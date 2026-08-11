@@ -4,10 +4,6 @@ Part of the **fomp** project. An automated momentum ("fomo") trading agent for t
 
 The agent polls fomo's trending/discovery feed, scores tokens by short-term momentum, buys the strongest candidate with a fixed USD size, and manages every position with take-profit, stop-loss, and max-hold-time exits. All fills are written to `data/trades.json` in the same schema as `fomp-pump-agent`, so the fomp tracking website can consume both agents identically.
 
-## ⚠️ Risk warning
-
-Momentum-chasing memecoins is extremely high risk — buying what is already pumping means routinely buying local tops. Use small `BUY_AMOUNT_USD`, keep the daily circuit breaker on, and never fund the account with money you can't lose. Your bearer/refresh tokens give **full trading access to your fomo account** — treat them like a password: keep them only in `.env` (gitignored), and revoke/rotate them from the Developer tab if you ever suspect a leak. Nothing here is financial advice.
-
 ## Authentication: Bearer + Refresh token
 
 fomo's Developer tab gives you two values:
