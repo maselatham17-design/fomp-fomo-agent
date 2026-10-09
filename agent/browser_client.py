@@ -1,75 +1,40 @@
-
-"""FOMO browser automation starter.
-
-Uses Codespaces environment secrets. Never hardcode credentials.
-Does not place trades.
-"""
+"""Inspect FOMO's sign-in page safely."""
 
 import asyncio
-import os
 from playwright.async_api import async_playwright
 
-FOMO_URL = "https://www.fomo.family"
-
-
 async def main():
-    username = os.getenv("FOMO_USERNAME")
-    password = os.getenv("FOMO_PASSWORD")
+async with async_playwright() as p:
+browser = await p.chromium.launch(headless=True)
+page = await browser.new_page()
 
-    if not username or not password:
-        raise RuntimeError(
-            "Missing FOMO_USERNAME or FOMO_PASSWORD Codespaces secret."
+```
+    try:
+        await page.goto(
+            "https://www.fomo.family",
+            wait_until="domcontentloaded",
+            timeout=60000,
         )
 
-    async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(headless=True)
-        context = await browser.new_context()
-        page = await context.new_page()
+        await page.wait_for_timeout(3000)
 
-        try:
-            await page.goto(
-                FOMO_URL,
-                wait_until="domcontentloaded",
-                timeout=60000,
-            )
+        print("PAGE URL:", page.url)
+        print("PAGE TITLE:", await page.title())
 
-            print("FOMO page opened:", page.url)
-            print("Page title:", await page.title())
+        print("\nBUTTONS:")
+        for item in await page.locator("button").all_text_contents():
+            print("-", item.strip())
 
-            username_fields = page.locator(
-                'input[autocomplete="username"], '
-                'input[type="email"], '
-                'input[name="username"], '
-                'input[name="email"]'
-            )
-            password_fields = page.locator(
-                'input[autocomplete="current-password"], '
-                'input[type="password"]'
-            )
+        print("\nLINKS:")
+        for item in await page.locator("a").all_text_contents():
+            if item.strip():
+                print("-", item.strip())
 
-            if (
-                await username_fields.count() == 0
-                or await password_fields.count() == 0
-            ):
-                print(
-                    "Login fields were not found. "
-                    "No credentials entered and no trades placed."
-                )
-                return
+        print("\nInspection complete. No trades placed.")
 
-            await username_fields.first.fill(username)
-            await password_fields.first.fill(password)
+    finally:
+        await browser.close()
+```
 
-            print(
-                "Login fields filled. Sign-in was NOT submitted; "
-                "the actual login flow must be confirmed first."
-            )
-            print("No trades placed.")
-
-        finally:
-            await context.close()
-            await browser.close()
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+if **name** == "**main**":
+asyncio.run(main())
