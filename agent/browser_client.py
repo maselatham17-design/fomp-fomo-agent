@@ -15,18 +15,19 @@ page = await browser.new_page()
             wait_until="domcontentloaded",
             timeout=60000,
         )
-
         await page.wait_for_timeout(3000)
 
         print("PAGE URL:", page.url)
         print("PAGE TITLE:", await page.title())
 
         print("\nBUTTONS:")
-        for item in await page.locator("button").all_text_contents():
+        buttons = await page.locator("button").all_text_contents()
+        for item in buttons:
             print("-", item.strip())
 
         print("\nLINKS:")
-        for item in await page.locator("a").all_text_contents():
+        links = await page.locator("a").all_text_contents()
+        for item in links:
             if item.strip():
                 print("-", item.strip())
 
