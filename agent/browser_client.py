@@ -1,9 +1,12 @@
 
-"""Browser-based FOMO Family login using Playwright."""
+"""FOMO browser automation starter.
+
+Uses Codespaces environment secrets. Never hardcode credentials.
+Does not place trades.
+"""
 
 import asyncio
 import os
-
 from playwright.async_api import async_playwright
 
 FOMO_URL = "https://www.fomo.family"
@@ -15,7 +18,7 @@ async def main():
 
     if not username or not password:
         raise RuntimeError(
-            "Set FOMO_USERNAME and FOMO_PASSWORD as environment secrets."
+            "Missing FOMO_USERNAME or FOMO_PASSWORD Codespaces secret."
         )
 
     async with async_playwright() as playwright:
@@ -30,34 +33,38 @@ async def main():
                 timeout=60000,
             )
 
-            # Find common login controls without assuming exact selectors.
-            user_field = page.locator(
-                'input[autocomplete="username"], '
-                'input[type="email"], input[name="username"], '
-                'input[name="email"]'
-            ).first
+            print("FOMO page opened:", page.url)
+            print("Page title:", await page.title())
 
-            password_field = page.locator(
+            username_fields = page.locator(
+                'input[autocomplete="username"], '
+                'input[type="email"], '
+                'input[name="username"], '
+                'input[name="email"]'
+            )
+            password_fields = page.locator(
                 'input[autocomplete="current-password"], '
                 'input[type="password"]'
-            ).first
+            )
 
-            if await user_field.count() == 0 or await password_field.count() == 0:
+            if (
+                await username_fields.count() == 0
+                or await password_fields.count() == 0
+            ):
                 print(
-                    "Login fields were not found on the initial page. "
-                    "The site's login flow may require clicking a login button "
-                    "or navigating to a sign-in page."
+                    "Login fields were not found. "
+                    "No credentials entered and no trades placed."
                 )
                 return
 
-            await user_field.fill(username)
-            await password_field.fill(password)
+            await username_fields.first.fill(username)
+            await password_fields.first.fill(password)
 
-            print("Login fields filled. Review the site's sign-in flow.")
-            print("No trade has been submitted.")
-
-            # Deliberately do not guess which button submits login.
-            # Confirm the actual login page before adding that action.
+            print(
+                "Login fields filled. Sign-in was NOT submitted; "
+                "the actual login flow must be confirmed first."
+            )
+            print("No trades placed.")
 
         finally:
             await context.close()
