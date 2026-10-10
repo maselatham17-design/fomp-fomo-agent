@@ -5,30 +5,25 @@ from playwright.async_api import async_playwright
 
 
 async def main():
-    profile_dir = str(Path(".fomo_browser_profile").resolve())
+    profile = Path(".fomo_browser_profile").resolve()
 
-    async with async_playwright() as p:
-        context = await p.chromium.launch_persistent_context(
-            user_data_dir=profile_dir,
+    async with async_playwright() as playwright:
+        browser_context = await playwright.chromium.launch_persistent_context(
+            user_data_dir=str(profile),
             headless=True,
-            viewport={"width": 1280, "height": 900},
         )
 
         try:
-            page = context.pages[0] if context.pages else await context.new_page()
-            await page.goto(
-                "https://www.fomo.family",
-                wait_until="domcontentloaded",
-                timeout=60000,
-            )
-            print("FOMO Family page opened:", page.url)
-            print("Browser session running. No trades will be placed.")
+            page = browser_context.pages[0] if browser_context.pages else await browser_context.new_page()
+            await page.goto("https://www.fomo.family", wait_until="domcontentloaded", timeout=60000)
+            print("FOMO Family opened:", page.url)
+            print("Session running. This script does not place trades.")
 
             while True:
                 await asyncio.sleep(10)
 
         finally:
-            await context.close()
+            await browser_context.close()
 
 
 if __name__ == "__main__":
