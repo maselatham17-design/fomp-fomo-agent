@@ -1,4 +1,4 @@
-
+```python
 import asyncio
 from pathlib import Path
 from playwright.async_api import async_playwright
@@ -14,13 +14,26 @@ async def main():
         )
 
         try:
-            page = browser_context.pages[0] if browser_context.pages else await browser_context.new_page()
-            await page.goto("https://www.fomo.family", wait_until="domcontentloaded", timeout=60000)
-            print("FOMO Family opened:", page.url)
-            print("Session running. This script does not place trades.")
+            page = (
+                browser_context.pages[0]
+                if browser_context.pages
+                else await browser_context.new_page()
+            )
 
-            while True:
-                await asyncio.sleep(10)
+            await page.goto(
+                "https://www.fomo.family",
+                wait_until="domcontentloaded",
+                timeout=60000,
+            )
+
+            print("URL:", page.url)
+            print("TITLE:", await page.title())
+            print("LOGIN FIELDS:", await page.locator(
+                'input[type="password"]'
+            ).count())
+            print("BROWSER CHECK COMPLETE — NO TRADES PLACED")
+
+            await asyncio.sleep(10)
 
         finally:
             await browser_context.close()
@@ -28,3 +41,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+```
