@@ -14,19 +14,39 @@ async def main():
         )
 
         try:
-            page = context.pages[0] if context.pages else await context.new_page()
+            page = (
+                context.pages[0]
+                if context.pages
+                else await context.new_page()
+            )
+
             await page.goto(
                 "https://www.fomo.family",
                 wait_until="domcontentloaded",
                 timeout=60000,
             )
-
-            await page.get_by_role("button", name="login", exact=True).click()
             await page.wait_for_timeout(3000)
 
-            print("LOGIN PAGE URL:", page.url)
-            print("PAGE TITLE:", await page.title())
-            print("\nINPUT FIELDS:")
+            print("WEBSITE:", page.url)
+            print("TITLE:", await page.title())
+
+            print("\nBUTTONS:")
+            for button in await page.locator("button").all_text_contents():
+                if button.strip():
+                    print("-", button.strip())
+
+            # Try the visible login text without requiring a button role.
+            login = page.get_by_text("login", exact=True).first
+
+            if await login.count() > 0:
+                try:
+                    await login.click(timeout=5000)
+                    await page.wait_for_timeout(2000)
+                except Exception as error:
+                    print("LOGIN CLICK:", str(error).splitlines()[0])
+
+            print("\nCURRENT PAGE:", page.url)
+            print("INPUT FIELDS:")
             for field in await page.locator("input").all():
                 print({
                     "type": await field.get_attribute("type"),
@@ -34,12 +54,7 @@ async def main():
                     "name": await field.get_attribute("name"),
                 })
 
-            print("\nBUTTONS:")
-            for text in await page.locator("button").all_text_contents():
-                if text.strip():
-                    print("-", text.strip())
-
-            print("\nLOGIN INSPECTION COMPLETE — NO TRADES PLACED")
+            print("\nINSPECTION COMPLETE — NO TRADES PLACED")
 
         finally:
             await context.close()
