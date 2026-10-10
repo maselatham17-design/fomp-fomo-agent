@@ -14,11 +14,7 @@ async def main():
         )
 
         try:
-            page = (
-                context.pages[0]
-                if context.pages
-                else await context.new_page()
-            )
+            page = context.pages[0] if context.pages else await context.new_page()
 
             await page.goto(
                 "https://www.fomo.family",
@@ -27,41 +23,36 @@ async def main():
             )
             await page.wait_for_timeout(3000)
 
-            print("WEBSITE:", page.url)
-            print("TITLE:", await page.title())
-            print(
-                "LOGIN TEXT MATCHES:",
-                await page.get_by_text("Login", exact=True).count(),
-            )
-
-            print("\nBUTTONS:")
-            for button in await page.locator("button").all_text_contents():
-                if button.strip():
-                    print("-", button.strip())
-
             login = page.get_by_text("Login", exact=True).first
 
-            if await login.count() > 0:
+            print("START URL:", page.url)
+            print("LOGIN MATCHES:", await login.count())
+
+            if await login.count():
+                print(
+                    "LOGIN ELEMENT:",
+                    await login.evaluate(
+                        """el => ({
+                            tag: el.tagName,
+                            text: el.innerText,
+                            href: el.getAttribute('href'),
+                            role: el.getAttribute('role'),
+                            html: el.outerHTML.slice(0, 1000)
+                        })"""
+                    ),
+                )
+
                 try:
                     await login.click(timeout=10000)
-                    await page.wait_for_timeout(3000)
+                    await page.wait_for_timeout(5000)
                 except Exception as error:
-                    print(
-                        "LOGIN CLICK ERROR:",
-                        str(error).splitlines()[0],
-                    )
+                    print("CLICK ERROR:", str(error).splitlines()[0])
 
-            print("\nCURRENT PAGE:", page.url)
-            print("INPUT FIELDS:")
-
-            for field in await page.locator("input").all():
-                print({
-                    "type": await field.get_attribute("type"),
-                    "placeholder": await field.get_attribute("placeholder"),
-                    "name": await field.get_attribute("name"),
-                })
-
-            print("\nINSPECTION COMPLETE — NO TRADES PLACED")
+            print("END URL:", page.url)
+            print("TITLE:", await page.title())
+            print("INPUT COUNT:", await page.locator("input").count())
+            print("PAGE TEXT:", (await page.locator("body").inner_text())[:1500])
+            print("INSPECTION COMPLETE — NO TRADES PLACED")
 
         finally:
             await context.close()
