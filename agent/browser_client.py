@@ -23,29 +23,25 @@ async def main():
             )
             await page.wait_for_timeout(3000)
 
-            print("START URL:", page.url)
-
             login = page.get_by_text("Login", exact=True).first
             print("LOGIN MATCHES:", await login.count())
 
             if await login.count():
-                try:
-                    async with page.expect_popup(timeout=5000) as popup_info:
-                        await login.click(timeout=10000)
+                print(
+                    "LOGIN HTML:",
+                    await login.evaluate(
+                        "el => el.closest('button, a')?.outerHTML || el.outerHTML"
+                    ),
+                )
 
-                    popup = await popup_info.value
-                    await popup.wait_for_load_state(
-                        "domcontentloaded", timeout=15000
-                    )
-                    print("POPUP URL:", popup.url)
-                    print("POPUP TITLE:", await popup.title())
+                print(
+                    "LOGIN PARENT:",
+                    await login.evaluate(
+                        "el => el.parentElement?.outerHTML.slice(0, 1500)"
+                    ),
+                )
 
-                except Exception as error:
-                    print("NO POPUP OR CLICK ISSUE:", str(error).splitlines()[0])
-
-            print("FINAL URL:", page.url)
-            print("PAGE COUNT:", len(context.pages))
-            print("INPUT COUNT:", await page.locator("input").count())
+            print("URL:", page.url)
             print("INSPECTION COMPLETE — NO TRADES PLACED")
 
         finally:
