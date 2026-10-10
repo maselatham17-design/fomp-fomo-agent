@@ -29,24 +29,31 @@ async def main():
 
             print("WEBSITE:", page.url)
             print("TITLE:", await page.title())
+            print(
+                "LOGIN TEXT MATCHES:",
+                await page.get_by_text("Login", exact=True).count(),
+            )
 
             print("\nBUTTONS:")
             for button in await page.locator("button").all_text_contents():
                 if button.strip():
                     print("-", button.strip())
 
-            # Try the visible login text without requiring a button role.
-            login = page.get_by_text("login", exact=True).first
+            login = page.get_by_text("Login", exact=True).first
 
             if await login.count() > 0:
                 try:
-                    await login.click(timeout=5000)
-                    await page.wait_for_timeout(2000)
+                    await login.click(timeout=10000)
+                    await page.wait_for_timeout(3000)
                 except Exception as error:
-                    print("LOGIN CLICK:", str(error).splitlines()[0])
+                    print(
+                        "LOGIN CLICK ERROR:",
+                        str(error).splitlines()[0],
+                    )
 
             print("\nCURRENT PAGE:", page.url)
             print("INPUT FIELDS:")
+
             for field in await page.locator("input").all():
                 print({
                     "type": await field.get_attribute("type"),
