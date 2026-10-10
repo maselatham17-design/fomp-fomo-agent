@@ -1,4 +1,4 @@
-```python
+
 import asyncio
 from pathlib import Path
 from playwright.async_api import async_playwright
@@ -28,9 +28,10 @@ async def main():
 
             print("URL:", page.url)
             print("TITLE:", await page.title())
-            print("LOGIN FIELDS:", await page.locator(
-                'input[type="password"]'
-            ).count())
+            print(
+                "PASSWORD FIELDS:",
+                await page.locator('input[type="password"]').count(),
+            )
             print("BROWSER CHECK COMPLETE — NO TRADES PLACED")
 
             await asyncio.sleep(10)
@@ -41,4 +42,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-```
