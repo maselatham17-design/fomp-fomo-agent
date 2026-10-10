@@ -20,21 +20,26 @@ async def main():
                 wait_until="domcontentloaded",
                 timeout=60000,
             )
-            await page.wait_for_timeout(5000)
 
-            print("URL:", page.url)
-            print("TITLE:", await page.title())
+            await page.get_by_role("button", name="login", exact=True).click()
+            await page.wait_for_timeout(3000)
+
+            print("LOGIN PAGE URL:", page.url)
+            print("PAGE TITLE:", await page.title())
+            print("\nINPUT FIELDS:")
+            for field in await page.locator("input").all():
+                print({
+                    "type": await field.get_attribute("type"),
+                    "placeholder": await field.get_attribute("placeholder"),
+                    "name": await field.get_attribute("name"),
+                })
+
             print("\nBUTTONS:")
-            for item in await page.locator("button").all_text_contents():
-                if item.strip():
-                    print("-", item.strip())
+            for text in await page.locator("button").all_text_contents():
+                if text.strip():
+                    print("-", text.strip())
 
-            print("\nLINKS:")
-            for item in await page.locator("a").all_text_contents():
-                if item.strip():
-                    print("-", item.strip())
-
-            print("\nINSPECTION COMPLETE — NO TRADES PLACED")
+            print("\nLOGIN INSPECTION COMPLETE — NO TRADES PLACED")
 
         finally:
             await context.close()
